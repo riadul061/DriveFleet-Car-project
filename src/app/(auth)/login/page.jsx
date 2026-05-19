@@ -24,7 +24,7 @@ export default function Login() {
         const formData = new FormData(e.currentTarget);
 
         const loginData = Object.fromEntries(formData.entries());
-        console.log(loginData)
+        // console.log(loginData)
         const { error } = await authClient.signIn.email({
             ...loginData,
             callbackURL: '/',
