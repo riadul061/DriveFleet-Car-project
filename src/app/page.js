@@ -1,6 +1,7 @@
 import Banner from "@/components/Banner";
 import CarSection from "@/components/CarSection";
 import IntegrationSection from "@/components/IntegrationSection";
+import PricingSection from "@/components/PricingSection";
 import Image from "next/image";
 
 export default function Home() {
@@ -11,6 +12,8 @@ export default function Home() {
       <CarSection/>
 
       <IntegrationSection/>
+
+      <PricingSection/>
 
     </div>
   );
