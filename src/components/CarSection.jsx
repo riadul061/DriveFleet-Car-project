@@ -44,7 +44,7 @@ const CarSection = async () => {
               </p>
 
               {/* ✅ Fix #2: use _id for MongoDB */}
-              <Link href={`/cars/${car._id}`}>
+              <Link href={`/explore-cars/${car._id}`}>
                 <Button className="mt-3 w-full bg-green-700 text-white hover:bg-green-800">
                   View Details
                 </Button>

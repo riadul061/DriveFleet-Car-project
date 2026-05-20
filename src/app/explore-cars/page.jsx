@@ -42,8 +42,8 @@ export default async function ExploreCarsPage() {
                         <div className="relative">
 
                             <Image
-                                src={car.image}
-                                alt={car.carName}
+                                src={car.image || '/placeholder.jpg'}
+                                alt={car.carName ?? 'Car image' }
                                  width={400}
                                  height={300}
                                 className="h-56 w-full object-cover"
@@ -124,7 +124,7 @@ export default async function ExploreCarsPage() {
                                 </div>
 
                                 <Link
-                                    href={`/cars/${car._id}`}
+                                    href={`/explore-cars/${car._id}`}
                                     className="text-blue-600 font-bold hover:underline"
                                 >
                                     View Details →
