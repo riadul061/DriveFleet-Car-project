@@ -1,3 +1,30 @@
+DriveFleet — Car Rental Platform
+A modern full-stack car rental web application where users can explore, book, and manage car listings with ease.
+
+
+🌐 Live Site
+👉 https://driveflet.vercel.app
+
+ Features:
+
+Secure Authentication — Users can register, login, and logout securely using Better Auth with JWT token verification. Protected routes ensure only logged-in users can access private pages.
+
+Explore & Search Cars — Browse all available cars with real-time search by name and filter by car type (SUV, Sedan, Luxury, etc.). Each car shows seat capacity, pickup location, availability, and daily rent price.
+
+Car Booking System — Logged-in users can book any available car with driver preference and special notes. Each booking updates the car's booking count and saves the booking history to the database.
+
+Manage Your Listings — Car owners can add new car listings, update details (price, image, type, location, availability, description), and delete their own listings with a confirmation modal.
+
+ My Bookings & My Listings Dashboard — Users have a personal dashboard to view all their past bookings and manage their own added cars — all filtered by their account.
+
+
+Tech Stack
+
+Frontend: Next.js 16, Tailwind CSS, HeroUI, Better Auth (client)
+Backend: Node.js, Express.js, MongoDB, Jose (JWT verification)
+Deployment: Vercel (frontend), Render (backend)
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

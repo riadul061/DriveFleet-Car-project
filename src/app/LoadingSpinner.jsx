@@ -1,12 +1,13 @@
-"use client";
+import React from "react";
+// import { HashLoader } from "react-spinners";
 
-const LoadingSpinner = () => {
+const loadingSpinner = () => {
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin">        Global loading......
-</div>
+    <div className="flex justify-center items-center bg-purple-200 h-screen font-bold text-5xl">
+        Global loading......
+      {/* <HashLoader color="#ad46ff" /> */}
     </div>
   );
 };
 
-export default LoadingSpinner;
+export default loadingSpinner;

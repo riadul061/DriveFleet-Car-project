@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
-const signOut = () => authClient.signOut();
 import {
   Search,
   Bell,
@@ -30,9 +29,15 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // ✅ onSuccess callback এ redirect — session clear হওয়ার পরেই যাবে
   const handleLogOut = async () => {
-    await signOut();
-    router.push("/");
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
   };
 
   return (
@@ -62,24 +67,16 @@ const Navbar = () => {
           {/* Desktop Nav Links */}
           <ul className="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-600">
             <li>
-              <Link href="/" className="hover:text-green-500 transition-colors">
-                Home
-              </Link>
+              <Link href="/" className="hover:text-green-500 transition-colors">Home</Link>
             </li>
             <li>
-              <Link href="/explore-cars" className="hover:text-green-500 transition-colors">
-                Explore Cars
-              </Link>
+              <Link href="/explore-cars" className="hover:text-green-500 transition-colors">Explore Cars</Link>
             </li>
             <li>
-              <Link href="/add-car" className="hover:text-green-500 transition-colors">
-                Add Car
-              </Link>
+              <Link href="/add-car" className="hover:text-green-500 transition-colors">Add Car</Link>
             </li>
             <li>
-              <Link href="/my-bookings" className="hover:text-green-500 transition-colors">
-                My Bookings
-              </Link>
+              <Link href="/my-bookings" className="hover:text-green-500 transition-colors">My Bookings</Link>
             </li>
           </ul>
 
@@ -107,19 +104,14 @@ const Navbar = () => {
               <div className="relative group">
                 <button className="flex items-center gap-3 p-1 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200">
                   <Image
-                    src={
-                      session?.user?.image ||
-                      "https://i.postimg.cc/L6KYKnGB/avatar.png"
-                    }
+                    src={session?.user?.image || "https://i.postimg.cc/L6KYKnGB/avatar.png"}
                     alt="avatar"
                     width={40}
                     height={40}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/20"
                   />
                   <div className="text-left hidden xl:block">
-                    <p className="text-sm font-bold truncate max-w-[100px]">
-                      {session?.user?.name}
-                    </p>
+                    <p className="text-sm font-bold truncate max-w-[100px]">{session?.user?.name}</p>
                     <p className="text-[10px] text-slate-500">Member</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -129,32 +121,17 @@ const Navbar = () => {
                 <div className="absolute right-0 top-14 w-56 bg-white border border-slate-200 rounded-2xl shadow-2xl hidden group-hover:flex flex-col py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="font-bold text-sm">Welcome back!</p>
-                    <p className="text-xs truncate text-slate-500">
-                      {session?.user?.email}
-                    </p>
+                    <p className="text-xs truncate text-slate-500">{session?.user?.email}</p>
                   </div>
-
-                  <Link
-                    href="/add-car"
-                    className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700"
-                  >
+                  <Link href="/add-car" className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700">
                     <PlusCircle className="w-4 h-4" /> Add Car
                   </Link>
-
-                  <Link
-                    href="/my-bookings"
-                    className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700"
-                  >
+                  <Link href="/my-bookings" className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700">
                     <Calendar className="w-4 h-4" /> My Bookings
                   </Link>
-
-                  <Link
-                    href="/my-added-cars"
-                    className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700"
-                  >
+                  <Link href="/my-added-cars" className="px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors text-gray-700">
                     <Car className="w-4 h-4" /> My Added Cars
                   </Link>
-
                   <button
                     onClick={handleLogOut}
                     className="px-4 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors text-left"
@@ -183,18 +160,10 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="lg:hidden px-4 pt-2 pb-6 space-y-2 bg-white border-t border-slate-200 animate-in slide-in-from-top duration-300">
-          <Link href="/" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">
-            Home
-          </Link>
-          <Link href="/explore-cars" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">
-            Explore Cars
-          </Link>
-          <Link href="/add-car" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">
-            Add Car
-          </Link>
-          <Link href="/my-bookings" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">
-            My Bookings
-          </Link>
+          <Link href="/" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">Home</Link>
+          <Link href="/explore-cars" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">Explore Cars</Link>
+          <Link href="/add-car" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">Add Car</Link>
+          <Link href="/my-bookings" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">My Bookings</Link>
 
           <div className="pt-4 border-t border-slate-200 mt-2">
             {!isPending && !session ? (
@@ -216,10 +185,7 @@ const Navbar = () => {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 px-4 py-3">
                   <Image
-                    src={
-                      session?.user?.image ||
-                      "https://i.postimg.cc/L6KYKnGB/avatar.png"
-                    }
+                    src={session?.user?.image || "https://i.postimg.cc/L6KYKnGB/avatar.png"}
                     alt="avatar"
                     width={36}
                     height={36}
@@ -230,11 +196,9 @@ const Navbar = () => {
                     <p className="text-xs text-slate-500">{session?.user?.email}</p>
                   </div>
                 </div>
-
                 <Link href="/my-added-cars" className="block px-4 py-3 text-base font-medium text-slate-900 hover:bg-slate-50 rounded-xl">
                   My Added Cars
                 </Link>
-
                 <button
                   onClick={handleLogOut}
                   className="w-full text-left px-4 py-3 text-base font-medium text-red-500 hover:bg-red-50 rounded-xl"
