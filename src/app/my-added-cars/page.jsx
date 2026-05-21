@@ -1,89 +1,73 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
 import Image from 'next/image';
-
+import Link from 'next/link';
 import {
     Button,
     Modal,
     ModalBody,
     ModalFooter,
     ModalHeader,
-    Input,
-    TextArea,
 } from '@heroui/react';
-
-import {
-    MapPin,
-    Users,
-    Pencil,
-    Trash2,
-} from 'lucide-react';
-
+import { authClient, useSession } from '@/lib/auth-client';
 import toast from 'react-hot-toast';
 
 export default function MyAddedCarsPage() {
-
     const [cars, setCars] = useState([]);
-
     const [selectedCar, setSelectedCar] = useState(null);
-
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [formData, setFormData] = useState({});
+    const { data: session } = useSession();
 
-    // Fetch Cars
+    // ✅ Fetch only logged-in user's cars
     useEffect(() => {
-
         const fetchCars = async () => {
-
             try {
+                const { data: jwtData } = await authClient.token();
+                const token = jwtData?.token;
 
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/explore`
+                    `${process.env.NEXT_PUBLIC_API_URL}/my-cars`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
                 );
-
                 const data = await res.json();
-
                 setCars(data);
-
             } catch (error) {
-
                 toast.error('Failed to load cars');
             }
         };
-
         fetchCars();
-
     }, []);
 
     // Open Update Modal
     const handleOpenUpdate = (car) => {
-
         setSelectedCar(car);
-
+        setFormData({
+            dailyRentPrice: car.dailyRentPrice || '',
+            image: car.image || '',
+            carType: car.carType || '',
+            pickupLocation: car.pickupLocation || '',
+            availability: car.availability || '',
+            description: car.description || '',
+        });
         setIsUpdateOpen(true);
     };
 
     // Open Delete Modal
     const handleOpenDelete = (car) => {
-
         setSelectedCar(car);
-
         setIsDeleteOpen(true);
     };
 
     // Update Car
-    const handleUpdateCar = async (e) => {
-
-        e.preventDefault();
-
-        const formData = new FormData(e.currentTarget);
-
-        const updatedData = Object.fromEntries(formData.entries());
-
+    const handleUpdateCar = async () => {
         try {
+            const { data: jwtData } = await authClient.token();
+            const token = jwtData?.token;
 
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/explore/${selectedCar._id}`,
@@ -91,8 +75,9 @@ export default function MyAddedCarsPage() {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify(updatedData),
+                    body: JSON.stringify(formData),
                 }
             );
 
@@ -104,33 +89,26 @@ export default function MyAddedCarsPage() {
             }
 
             toast.success('Car updated successfully');
-
-            // Update UI
-            const updatedCars = cars.map((car) =>
-                car._id === selectedCar._id
-                    ? { ...car, ...updatedData }
-                    : car
-            );
-
-            setCars(updatedCars);
-
+            setCars(cars.map((car) =>
+                car._id === selectedCar._id ? { ...car, ...formData } : car
+            ));
             setIsUpdateOpen(false);
-
         } catch (error) {
-
             toast.error('Something went wrong');
         }
     };
 
     // Delete Car
     const handleDeleteCar = async () => {
-
         try {
+            const { data: jwtData } = await authClient.token();
+            const token = jwtData?.token;
 
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/explore/${selectedCar._id}`,
                 {
                     method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` },
                 }
             );
 
@@ -142,17 +120,9 @@ export default function MyAddedCarsPage() {
             }
 
             toast.success('Car deleted successfully');
-
-            const remainingCars = cars.filter(
-                (car) => car._id !== selectedCar._id
-            );
-
-            setCars(remainingCars);
-
+            setCars(cars.filter((car) => car._id !== selectedCar._id));
             setIsDeleteOpen(false);
-
         } catch (error) {
-
             toast.error('Something went wrong');
         }
     };
@@ -161,239 +131,140 @@ export default function MyAddedCarsPage() {
         <div className="min-h-screen bg-[#f7f4ed] py-10 px-4">
 
             {/* Heading */}
-            <div className="max-w-7xl mx-auto mb-10">
-
-                <p className="uppercase tracking-[5px] text-sm font-black text-lime-700">
-                    Dashboard
-                </p>
-
-                <h1 className="text-5xl md:text-7xl font-black text-black mt-3">
-                    My Added Cars
-                </h1>
-
-                <p className="text-gray-500 mt-4 text-lg">
-                    Manage your listed cars easily.
-                </p>
+            <div className="max-w-4xl mx-auto mb-10 flex items-start justify-between">
+                <div>
+                    <p className="uppercase tracking-[5px] text-sm font-black text-lime-700">
+                        Private Layout
+                    </p>
+                    <h1 className="text-5xl md:text-7xl font-black text-black mt-2">
+                        My Listings
+                    </h1>
+                </div>
+                <Link href="/add-car">
+                    <button className="bg-lime-400 hover:bg-lime-500 transition-colors text-black font-black px-6 py-3 rounded-full text-sm mt-4">
+                        Add Car
+                    </button>
+                </Link>
             </div>
 
-            {/* Cards */}
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Empty State */}
+            {cars.length === 0 && (
+                <div className="max-w-4xl mx-auto bg-white rounded-[2rem] p-10 text-center shadow-sm">
+                    <h2 className="text-3xl font-black text-black">No Cars Found</h2>
+                    <p className="text-gray-500 mt-3">You haven't added any cars yet.</p>
+                </div>
+            )}
 
+            {/* Car Cards */}
+            <div className="max-w-4xl mx-auto flex flex-col gap-4">
                 {cars.map((car) => (
-
                     <div
                         key={car._id}
-                        className="bg-white rounded-[2rem] overflow-hidden shadow-sm"
+                        className="bg-white rounded-2xl overflow-hidden shadow-sm flex items-center gap-5 p-4"
                     >
-
-                        {/* Image */}
-                        <div className="relative h-64">
-
+                        {/* Car Image */}
+                        <div className="relative w-32 h-24 rounded-xl overflow-hidden flex-shrink-0">
                             <Image
                                 src={car.image || '/placeholder.svg'}
                                 alt={car.carName ?? 'Car image'}
-                                width={400}
-                                height={300}
+                                fill
                                 className="object-cover"
                             />
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6">
-
-                            <p className="uppercase tracking-[4px] text-xs font-black text-lime-700">
-                                {car.carType}
-                            </p>
-
-                            <h2 className="text-3xl font-black text-black mt-2">
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-xl font-black text-black truncate">
                                 {car.carName}
                             </h2>
+                            <p className="text-sm text-gray-500 mt-0.5">
+                                {car.carType} · {car.pickupLocation} · ${car.dailyRentPrice}/day
+                            </p>
+                            <span className={`inline-block mt-2 text-sm font-bold ${
+                                car.availability === 'available'
+                                    ? 'text-lime-600'
+                                    : 'text-red-500'
+                            }`}>
+                                {car.availability === 'available' ? 'Available' : 'Unavailable'}
+                            </span>
+                        </div>
 
-                            <div className="flex items-end gap-2 mt-4">
-
-                                <h3 className="text-4xl font-black text-black">
-                                    ${car.dailyRentPrice}
-                                </h3>
-
-                                <span className="text-gray-500 mb-1">
-                                    / day
-                                </span>
-                            </div>
-
-                            {/* Info */}
-                            <div className="space-y-3 mt-6">
-
-                                <div className="flex items-center gap-2 text-gray-700">
-
-                                    <Users className="w-4 h-4" />
-
-                                    <span>
-                                        {car.seatCapacity} Seats
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center gap-2 text-gray-700">
-
-                                    <MapPin className="w-4 h-4" />
-
-                                    <span>
-                                        {car.pickupLocation}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Status */}
-                            <div className="mt-6">
-
-                                <span className={`px-4 py-2 rounded-full text-sm font-bold ${
-                                    car.availability === 'available'
-                                        ? 'bg-lime-100 text-lime-700'
-                                        : 'bg-red-100 text-red-600'
-                                }`}>
-                                    {car.availability}
-                                </span>
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="flex gap-3 mt-8">
-
-                                {/* Update */}
-                                <Button
-                                    onPress={() => handleOpenUpdate(car)}
-                                    className="flex-1 h-12 rounded-2xl bg-black text-white font-bold"
-                                >
-                                    <Pencil className="w-4 h-4" />
-
-                                    Update
-                                </Button>
-
-                                {/* Delete */}
-                                <Button
-                                    onPress={() => handleOpenDelete(car)}
-                                    className="flex-1 h-12 rounded-2xl bg-red-500 text-white font-bold"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-
-                                    Delete
-                                </Button>
-                            </div>
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                                onClick={() => handleOpenUpdate(car)}
+                                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => handleOpenDelete(car)}
+                                className="px-4 py-2 rounded-xl border border-red-200 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Update Modal */}
-            <Modal
-                isOpen={isUpdateOpen}
-                onOpenChange={setIsUpdateOpen}
-                size="2xl"
-            >
-
-                <ModalHeader>
-                    Update Car
-                </ModalHeader>
-
-                <form onSubmit={handleUpdateCar}>
-
-                    <ModalBody className="space-y-4">
-
-                        <Input
-                            label="Price"
-                            name="dailyRentPrice"
-                            defaultValue={selectedCar?.dailyRentPrice?.toString()}
+            <Modal isOpen={isUpdateOpen} onOpenChange={setIsUpdateOpen} size="2xl">
+                <ModalHeader>Update Car</ModalHeader>
+                <ModalBody className="space-y-4">
+                    {[
+                        { label: 'Price', key: 'dailyRentPrice' },
+                        { label: 'Image URL', key: 'image' },
+                        { label: 'Car Type', key: 'carType' },
+                        { label: 'Pickup Location', key: 'pickupLocation' },
+                        { label: 'Availability', key: 'availability' },
+                    ].map(({ label, key }) => (
+                        <div key={key}>
+                            <label className="text-sm font-bold text-gray-700 block mb-1">{label}</label>
+                            <input
+                                value={formData[key] || ''}
+                                onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                            />
+                        </div>
+                    ))}
+                    <div>
+                        <label className="text-sm font-bold text-gray-700 block mb-1">Description</label>
+                        <textarea
+                            value={formData.description || ''}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            rows={4}
+                            className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-black resize-none"
                         />
-
-                        <Input
-                            label="Image URL"
-                            name="image"
-                            defaultValue={selectedCar?.image}
-                        />
-
-                        <Input
-                            label="Car Type"
-                            name="carType"
-                            defaultValue={selectedCar?.carType}
-                        />
-
-                        <Input
-                            label="Pickup Location"
-                            name="pickupLocation"
-                            defaultValue={selectedCar?.pickupLocation}
-                        />
-
-                        <Input
-                            label="Availability"
-                            name="availability"
-                            defaultValue={selectedCar?.availability}
-                        />
-
-                        <TextArea
-                            label="Description"
-                            name="description"
-                            defaultValue={selectedCar?.description}
-                            rows={5}
-                        />
-
-                    </ModalBody>
-
-                    <ModalFooter>
-
-                        <Button
-                            variant="light"
-                            onPress={() => setIsUpdateOpen(false)}
-                        >
-                            Cancel
-                        </Button>
-
-                        <Button
-                            type="submit"
-                            className="bg-black text-white"
-                        >
-                            Save Changes
-                        </Button>
-
-                    </ModalFooter>
-
-                </form>
-
+                    </div>
+                </ModalBody>
+                <ModalFooter>
+                    <Button variant="light" onPress={() => setIsUpdateOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button onPress={handleUpdateCar} className="bg-black text-white">
+                        Save Changes
+                    </Button>
+                </ModalFooter>
             </Modal>
 
             {/* Delete Modal */}
-            <Modal
-                isOpen={isDeleteOpen}
-                onOpenChange={setIsDeleteOpen}
-            >
-
-                <ModalHeader>
-                    Delete Car
-                </ModalHeader>
-
+            <Modal isOpen={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <ModalHeader>Delete Car</ModalHeader>
                 <ModalBody>
-
                     <p className="text-gray-600">
-                        Are you sure you want to delete this car listing?
+                        Are you sure you want to delete{' '}
+                        <span className="font-bold text-black">{selectedCar?.carName}</span>?
                     </p>
-
                 </ModalBody>
-
                 <ModalFooter>
-
-                    <Button
-                        variant="light"
-                        onPress={() => setIsDeleteOpen(false)}
-                    >
+                    <Button variant="light" onPress={() => setIsDeleteOpen(false)}>
                         Cancel
                     </Button>
-
-                    <Button
-                        onPress={handleDeleteCar}
-                        className="bg-red-500 text-white"
-                    >
+                    <Button onPress={handleDeleteCar} className="bg-red-500 text-white">
                         Delete
                     </Button>
-
                 </ModalFooter>
-
             </Modal>
         </div>
     );
