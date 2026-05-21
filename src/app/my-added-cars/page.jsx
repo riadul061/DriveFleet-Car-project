@@ -190,7 +190,7 @@ export default function MyAddedCarsPage() {
                         <div className="relative h-64">
 
                             <Image
-                                src={car.image || '/placeholder.jpg'}
+                                src={car.image || '/placeholder.svg'}
                                 alt={car.carName ?? 'Car image'}
                                 width={400}
                                 height={300}

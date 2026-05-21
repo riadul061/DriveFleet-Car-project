@@ -106,7 +106,7 @@ export default function MyBookingsPage() {
                         <div className="relative h-64">
 
                             <Image
-                                src={booking.carImage || '/placeholder.jpg'}
+                                src={booking.carImage || '/placeholder.svg'}
                                 alt={booking.carName ?? 'Car image'}
                                 width={400}
                                 height={300}
