@@ -17,10 +17,10 @@ DriveFleet solves the problem of managing and booking rental cars online. Users 
 ## 🖼️ Screenshots
 
 ### 🏠 Home Page
-![DriveFleet Home Page](./home.png)
+![DriveFleet Home Page](./Screenshot%202026-06-03%20200056.png)
 
 ### 🚘 Car Listings
-![DriveFleet Car Listings](./dashboard.png)
+![DriveFleet Car Listings](./Screenshot%202026-06-03%20200202.png)
 
 ---
 
